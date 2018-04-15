@@ -1,11 +1,11 @@
 import torch
 import torch.nn as nn
-import torch.optim as optim
 from torch.autograd import Variable
+import torch.nn.parallel
 
 class Generator(nn.Module):
 
-	def __init__(self, ngpu):
+	def __init__(self):
 		
 		super(Generator, self).__init__()
 
