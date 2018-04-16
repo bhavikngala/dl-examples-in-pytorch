@@ -9,6 +9,7 @@ import torch.backends.cudnn as cudnn
 import torch.nn.parallel
 from torch.autograd import Variable
 
+import torchvision
 import torchvision.datasets as dset
 import torchvision.transforms as transforms
 import torchvision.utils as vutils
@@ -28,24 +29,31 @@ try:
 except OSError:
 	pass
 
+print('\n~~~~~~~ Preparing data')
+
 # read, transform, load data
 dataset = dset.LSUN(
-	root = dataDir,
-	classes = ['bedroom_train'],
-	transform = transforms.Compose([
+	dataDir,
+	classes=['bedroom_train'],
+	transform=transforms.Compose([
 		transforms.Resize(64),
+		transforms.CenterCrop(64),
 		transforms.ToTensor(),
 		transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
-	])
+		]
+	)
 )
 
 assert dataset
+
 dataloader = torch.utils.data.DataLoader(
 	dataset,
 	batch_size = 64,
 	shuffle = True,
 	num_workers = 2
 )
+
+print('\n~~~~~~~ Done loading data')
 
 # custom weights initialization called on G and D networks
 def weights_init(net):
@@ -76,8 +84,10 @@ if discriminatorNetDir != '':
 
 print(discriminator)
 
+print('\n~~~~~~~ Created networks')
+
 # define the loss function
-criterion = nn.BCELosss()
+criterion = nn.BCELoss()
 
 # define tensors
 input = torch.FloatTensor(64, 3, 64, 64)
@@ -112,7 +122,9 @@ optimizerG = optim.Adam(
 
 numEpochs = 25
 # training
+print('\n~~~~~~~ Started training')
 for epoch in range(numEpochs):
+	print('Epoch: %03d' % epoch)
 	for i, data in enumerate(dataloader, 0):
 		###########################
 		# (1) Update D network: maximize log(D(x)) + log(1 - D(G(z)))
@@ -125,7 +137,7 @@ for epoch in range(numEpochs):
 		if torch.cuda.is_available():
 			real_cpu = real_cpu.cuda()
 
-		input = resize_as_(real_cpu).copy_(real_cpu)
+		input.resize_as_(real_cpu).copy_(real_cpu)
 		label.resize_(batch_size).fill_(real_label)
 		inputv = Variable(input)
 		labelv = Variable(label)
@@ -137,8 +149,8 @@ for epoch in range(numEpochs):
 
 		# train with fake
 		noise.resize_(batch_size, 100, 1, 1).normal_(0, 1)
-		noizev = Variable(noize)
-		fakeData = generator(noizev)
+		noisev = Variable(noise)
+		fakeData = generator(noisev)
 		labelv = Variable(label.fill_(fake_label))
 		output = discriminator(fakeData.detach())
 		discriminatorErrorFake = criterion(output, labelv)

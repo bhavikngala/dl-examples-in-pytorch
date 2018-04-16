@@ -22,7 +22,7 @@ class Discriminator(nn.Module):
 				padding = 1,
 				bias = False
 			),
-			nn.LeakyRelu(negative_slope = 0.2, inplace = True),
+			nn.LeakyReLU(negative_slope = 0.2, inplace = True),
 
 			# state size. (64) * 32 * 32
 			nn.Conv2d(
@@ -33,8 +33,8 @@ class Discriminator(nn.Module):
 				padding = 1,
 				bias = False
 			),
-			nn.BatchNorm2d(feature_size = 64 * 2),
-			nn.LeakyRelu(negative_slope = 0.2, inplace = True),
+			nn.BatchNorm2d(num_features = 64 * 2),
+			nn.LeakyReLU(negative_slope = 0.2, inplace = True),
 
 			# state size. (64 * 2) * 16 * 16
 			nn.Conv2d(
@@ -45,8 +45,8 @@ class Discriminator(nn.Module):
 				padding = 1,
 				bias = False
 			),
-			nn.BatchNorm2d(feature_size = 64 * 4),
-			nn.LeakyRelu(negative_slope = 0.2 inplace = True),
+			nn.BatchNorm2d(num_features = 64 * 4),
+			nn.LeakyReLU(negative_slope = 0.2, inplace = True),
 
 			# state size. (64 * 4) * 8 * 8
 			nn.Conv2d(
@@ -57,8 +57,8 @@ class Discriminator(nn.Module):
 				padding = 1,
 				bias = False
 			),
-			nn.BatchNorm2d(feature_size = 64 * 8),
-			nn.LeakyRelu(negative_slope = 0.2, inplace = True),
+			nn.BatchNorm2d(num_features = 64 * 8),
+			nn.LeakyReLU(negative_slope = 0.2, inplace = True),
 
 			# state size. (64 * 8) * 4 * 4
 			nn.Conv2d(
@@ -73,7 +73,7 @@ class Discriminator(nn.Module):
 		)
 
 	def forward(self, input):
-		if isintance(input.data, torch,cuda,FloatTensor) and self.ngpu > 1:
+		if isinstance(input.data, torch.cuda.FloatTensor) and self.ngpu > 1:
 			# then run parallely on multiple GPUs
 			output = nn.parallel.data_parallel(
 				self.main,
@@ -83,4 +83,4 @@ class Discriminator(nn.Module):
 		else:
 			output = self.main(input)
 
-		return output.view(-1, 1).squeese(1)
+		return output.view(-1, 1).squeeze(1)
