@@ -17,6 +17,12 @@ import torchvision.utils as vutils
 from Generator import Generator
 from Discriminator import Discriminator
 
+# setting manual seed for cuda
+manualSeed = random.randint(1, 10000)
+torch.manual_seed(manualSeed)
+if torch.cuda.is_available():
+	torch.cuda.manual_seed_all(manualSeed)
+
 # data directories
 outputDir = './output'
 dataDir = './data'
